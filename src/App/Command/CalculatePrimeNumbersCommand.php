@@ -5,6 +5,8 @@ namespace App\Command;
 
 use App\Model\PrimeNumber;
 use App\Services\CalculatePrimeNumbersService;
+use DOMDocument;
+use DOMNode;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
@@ -19,7 +21,7 @@ class CalculatePrimeNumbersCommand extends Command {
             ->setDescription('Calculates prime numbers between 0 and the given limit.')
             ->setHelp('This command allows you to calculate the prime numbers between 0 and the limit that is given.')
             ->addArgument('range', InputArgument::REQUIRED, 'The range to where the prime numbers should be calculated.')
-        ;
+            ->addArgument('fileName', InputArgument::REQUIRED, 'The name of the XML file. (no .xml needed)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
@@ -27,6 +29,9 @@ class CalculatePrimeNumbersCommand extends Command {
 
         $range = $input->getArgument('range');
         $primeNumberArray = [];
+        $domDocument = new DOMDocument('1.0', 'UTF-8');
+        $xmlRoot = $domDocument->createElement("xml");
+        $xmlRoot = $domDocument->appendChild($xmlRoot);
 
         $output->writeln('<info>Starting calculations</info>');
 
@@ -36,11 +41,9 @@ class CalculatePrimeNumbersCommand extends Command {
 
         for($i = self::START_INTEGER; $i < $range; $i += 1) {
             if($calculatePrimeNumbersService->isPrimeNumber($i)) {
-                $primeNumber = new PrimeNumber();
-                $countFromZero = sizeof($primeNumberArray) + 1;
-                $primeNumber->setValue($i)
-                    ->setCountFromZero($countFromZero)
-                    ->calculateAndsetRomanLiteral($i);
+                $primeNumber = $this->createPrimeNumberObject($primeNumberArray, $i);
+
+                $this->addPrimeNumberToXml($domDocument, $xmlRoot, $primeNumber);
 
                 $primeNumberArray[] = $primeNumber;
             }
@@ -48,6 +51,11 @@ class CalculatePrimeNumbersCommand extends Command {
         }
 
         $output->writeln('');
+
+        $domDocument->formatOutput = true;
+        $domDocument->save($input->getArgument('fileName').'.xml');
+        $output->writeln('<info>Saved the XML file</info>');
+
         $outputString = $this->primeNumberArrayToRomanNumeralString($primeNumberArray);
         $output->writeln($outputString);
     }
@@ -63,5 +71,33 @@ class CalculatePrimeNumbersCommand extends Command {
         $romanNumeralsString .= $lastPrimeNumber->getRomanLiteral();
 
         return $romanNumeralsString;
+    }
+
+    /**
+     * @param array $primeNumberArray
+     * @param int $value
+     * @return PrimeNumber
+     */
+    private function createPrimeNumberObject(array $primeNumberArray, int $value): PrimeNumber {
+        $primeNumber = new PrimeNumber();
+        $countFromZero = sizeof($primeNumberArray) + 1;
+        $primeNumber->setValue($value)
+            ->setCountFromZero($countFromZero)
+            ->calculateAndsetRomanLiteral($value);
+        return $primeNumber;
+    }
+
+    /**
+     * @param DOMDocument $domDocument
+     * @param DOMNode $xmlRoot
+     * @param PrimeNumber $primeNumber
+     */
+    private function addPrimeNumberToXml(DOMDocument $domDocument, DOMNode $xmlRoot, PrimeNumber $primeNumber): void
+    {
+        $currentTrack = $domDocument->createElement("primeNumber");
+        $currentTrack = $xmlRoot->appendChild($currentTrack);
+        $currentTrack->appendChild($domDocument->createElement('value', $primeNumber->getValue()));
+        $currentTrack->appendChild($domDocument->createElement('countFromZero', $primeNumber->getCountFromZero()));
+        $currentTrack->appendChild($domDocument->createElement('romanLiteral', $primeNumber->getRomanLiteral()));
     }
 }
