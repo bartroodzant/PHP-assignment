@@ -3,8 +3,10 @@
 require __DIR__.'/vendor/autoload.php';
 
 use App\Command\CalculatePrimeNumbersCommand;
+use App\Command\ExportToDatabaseCommand;
 use Symfony\Component\Console\Application;
 
 $app = new Application('Prime Number Commands', '0.0.1');
-$app -> add(new CalculatePrimeNumbersCommand());
-$app -> run();
+$app->add(new CalculatePrimeNumbersCommand());
+$app->add(new ExportToDatabaseCommand());
+$app->run();

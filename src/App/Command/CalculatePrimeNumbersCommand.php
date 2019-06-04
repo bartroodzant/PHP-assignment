@@ -14,6 +14,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class CalculatePrimeNumbersCommand extends Command {
+
     const START_INTEGER = 0;
 
     protected function configure() {
@@ -24,11 +25,16 @@ class CalculatePrimeNumbersCommand extends Command {
             ->addArgument('fileName', InputArgument::REQUIRED, 'The name of the XML file. (no .xml needed)');
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|void|null
+     */
     protected function execute(InputInterface $input, OutputInterface $output) {
         $calculatePrimeNumbersService = new CalculatePrimeNumbersService();
-
         $range = $input->getArgument('range');
         $primeNumberArray = [];
+
         $domDocument = new DOMDocument('1.0', 'UTF-8');
         $xmlRoot = $domDocument->createElement("xml");
         $xmlRoot = $domDocument->appendChild($xmlRoot);
@@ -60,6 +66,10 @@ class CalculatePrimeNumbersCommand extends Command {
         $output->writeln($outputString);
     }
 
+    /**
+     * @param array $primeNumberArray
+     * @return string
+     */
     private function primeNumberArrayToRomanNumeralString(array $primeNumberArray) {
         $romanNumeralsString = '';
         $lastPrimeNumber = array_pop($primeNumberArray);

@@ -50,6 +50,10 @@ class PrimeNumber
         return $this->romanLiteral;
     }
 
+    public function setRomanLiteral(string $romanLiteral) {
+        $this->romanLiteral = $romanLiteral;
+    }
+
     /**
      * @param int $value
      * @return PrimeNumber
@@ -60,7 +64,11 @@ class PrimeNumber
         return $this;
     }
 
-    private function calculateNumberToRomanLiteral($number) {
+    /**
+     * @param int $number
+     * @return string
+     */
+    private function calculateNumberToRomanLiteral(int $number) {
         $map = [
             "M\u{0305}" => 1000000, "D\u{0305}" => 500000, "C\u{0305}" => 100000,
             "L\u{0305}" => 50000, "X\u{0305}" => 10000, "V\u{0305}" => 5000,
