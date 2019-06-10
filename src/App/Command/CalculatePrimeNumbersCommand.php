@@ -24,7 +24,7 @@ class CalculatePrimeNumbersCommand extends Command {
         $this->setName('calculate')
             ->setDescription('Calculates prime numbers between 0 and the given limit.')
             ->setHelp('This command allows you to calculate the prime numbers between 0 and the limit that is given.')
-            ->addArgument('range', InputArgument::REQUIRED, 'The range to where the prime numbers should be calculated.')
+            ->addArgument('range', InputArgument::REQUIRED, 'The range to where the prime numbers should be calculated up to 2097152.')
             ->addArgument('fileName', InputArgument::REQUIRED, 'The name of the XML file. (no .xml needed)');
     }
 
@@ -34,7 +34,11 @@ class CalculatePrimeNumbersCommand extends Command {
      * @return int|void|null
      */
     protected function execute(InputInterface $input, OutputInterface $output) {
+
         $range = $input->getArgument('range');
+        $fileName = $input->getArgument('fileName');
+
+        $this->validateRange($range, $output);
 
         $domDocument = new DOMDocument('1.0', 'UTF-8');
         $xmlRoot = $domDocument->createElement("xml");
@@ -54,7 +58,7 @@ class CalculatePrimeNumbersCommand extends Command {
         $output->writeln('');
 
         $domDocument->formatOutput = true;
-        $domDocument->save($input->getArgument('fileName').'.xml');
+        $domDocument->save($fileName.'.xml');
         $output->writeln('<info>Saved the XML file</info>');
 
         $outputString = $this->primeNumberArrayToRomanNumeralString($primeNumberArray);
@@ -118,7 +122,7 @@ class CalculatePrimeNumbersCommand extends Command {
         $romanNumeralsString = '';
         $lastPrimeNumber = array_pop($primeNumberArray);
 
-        foreach($primeNumberArray as $key => $primeNumber) {
+        foreach ($primeNumberArray as $key => $primeNumber) {
             $romanNumeralsString .= $primeNumber->getRomanLiteral() . ', ';
         }
 
@@ -132,13 +136,36 @@ class CalculatePrimeNumbersCommand extends Command {
      * @param DOMNode $xmlRoot
      * @param PrimeNumber $primeNumber
      */
-    private function addPrimeNumberToXml(DOMDocument $domDocument, DOMNode $xmlRoot, PrimeNumber $primeNumber): void
-    {
+    private function addPrimeNumberToXml(DOMDocument $domDocument, DOMNode $xmlRoot, PrimeNumber $primeNumber): void {
         $currentTrack = $domDocument->createElement("primeNumber");
         $currentTrack = $xmlRoot->appendChild($currentTrack);
         $currentTrack->appendChild($domDocument->createElement('value', $primeNumber->getValue()));
         $currentTrack->appendChild($domDocument->createElement('countFromZero', $primeNumber->getCountFromZero()));
         $currentTrack->appendChild($domDocument->createElement('romanLiteral', $primeNumber->getRomanLiteral()));
+    }
+
+    /**
+     * @param $range
+     * @param OutputInterface $output
+     */
+    private function validateRange($range, OutputInterface $output) {
+        if (!is_int($range)) {
+            $this->outputErrorMessageAndExit($output, 'The range must be an integer');
+        }
+        // The max range is currently 209153 because of a memory constraint. This can be updated in the future
+        if ($range > 2097152) {
+            $this->outputErrorMessageAndExit($output, 'The range must be smaller than 209153');
+        }
+    }
+
+    /**
+     * This function can be encapsulated in the future to remove double code
+     * @param OutputInterface $output
+     * @param string $message
+     */
+    private function outputErrorMessageAndExit(OutputInterface $output, string $message): void {
+        $output->writeln('<error>'.$message.'</error>');
+        exit(1);
     }
 
 }

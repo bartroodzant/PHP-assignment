@@ -32,6 +32,8 @@ class ExportToDatabaseCommand extends Command {
         $fileName = $input->getArgument('fileName');
         $databaseName = $input->getArgument('databaseName');
 
+        $this->validateFile($fileName, $output);
+
         $output->writeln('<info>Parsing and saving data</info>');
 
         $primeNumbers = $this->getPrimeNumbersFromXMLFile($fileName);
@@ -87,6 +89,26 @@ class ExportToDatabaseCommand extends Command {
      */
     private function getElementFromXml(DOMElement $DOMElement, string $name) {
         return $DOMElement->getElementsByTagName($name)->item(0)->nodeValue;
+    }
+
+    /**
+     * @param string $fileName
+     * @param OutputInterface $output
+     */
+    private function validateFile(string $fileName, OutputInterface $output) {
+        if (!file_exists($fileName)) {
+            $this->outputErrorMessageAndExit($output, "The file ".$fileName.".xml doesn't exist");
+        }
+    }
+
+    /**
+     * This function can be encapsulated in the future to remove double code
+     * @param OutputInterface $output
+     * @param string $message
+     */
+    private function outputErrorMessageAndExit(OutputInterface $output, string $message): void {
+        $output->writeln('<error>'.$message.'</error>');
+        exit(1);
     }
 
 }

@@ -28,6 +28,9 @@ class DatabaseService
         $this->database->exec($sql);
     }
 
+    /**
+     * @param PrimeNumber $primeNumber
+     */
     public function insertPrimeNumber(PrimeNumber $primeNumber) {
         $sql = 'INSERT OR IGNORE INTO prime_numbers(value, count_from_zero, roman_literal) 
                 VALUES(:value, :count_from_zero, :roman_literal)';
