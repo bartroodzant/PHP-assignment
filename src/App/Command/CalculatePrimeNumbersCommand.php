@@ -66,6 +66,9 @@ class CalculatePrimeNumbersCommand extends Command {
     }
 
     /**
+     * The calculations are done with the Sieve of Eratosthenes
+     * Wikipage: https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
+     * PHP implementation: https://gist.github.com/kgaughan/1932132
      * @param int $limit
      * @param $range
      * @return array
@@ -132,6 +135,7 @@ class CalculatePrimeNumbersCommand extends Command {
     }
 
     /**
+     * Documentation for DOMDocument: https://www.php.net/manual/en/class.domdocument.php
      * @param DOMDocument $domDocument
      * @param DOMNode $xmlRoot
      * @param PrimeNumber $primeNumber

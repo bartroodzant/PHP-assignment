@@ -48,6 +48,7 @@ class ExportToDatabaseCommand extends Command {
     }
 
     /**
+     * Documentation for DOMDocument: https://www.php.net/manual/en/class.domdocument.php
      * @param $fileName
      * @return array
      */
@@ -70,9 +71,9 @@ class ExportToDatabaseCommand extends Command {
      * @return PrimeNumber
      */
     private function createPrimeNumberFromDOMElement(DOMElement $DOMElement) {
-        $value = $this->getElementFromXml($DOMElement, 'value');
-        $countFromZero = $this->getElementFromXml($DOMElement, 'countFromZero');
-        $romanLiteral = $this->getElementFromXml($DOMElement, 'romanLiteral');
+        $value = $this->getElementFromXmlByTagName($DOMElement, 'value');
+        $countFromZero = $this->getElementFromXmlByTagName($DOMElement, 'countFromZero');
+        $romanLiteral = $this->getElementFromXmlByTagName($DOMElement, 'romanLiteral');
 
         $primeNumber = new PrimeNumber();
         $primeNumber->setValue($value)
@@ -87,7 +88,7 @@ class ExportToDatabaseCommand extends Command {
      * @param string $name
      * @return string
      */
-    private function getElementFromXml(DOMElement $DOMElement, string $name) {
+    private function getElementFromXmlByTagName(DOMElement $DOMElement, string $name) {
         return $DOMElement->getElementsByTagName($name)->item(0)->nodeValue;
     }
 
