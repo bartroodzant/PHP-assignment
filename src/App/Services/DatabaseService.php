@@ -29,15 +29,21 @@ class DatabaseService
     }
 
     /**
-     * @param PrimeNumber $primeNumber
+     * Insert all the prime numbers into the database using a transaction.
+     * Source: https://stackoverflow.com/questions/18257586/php-sqlite3-not-pdo-transactions
+     * @param array $primeNumbers
      */
-    public function insertPrimeNumber(PrimeNumber $primeNumber) {
-        $sql = 'INSERT OR IGNORE INTO prime_numbers(value, count_from_zero, roman_literal) 
+    public function insertAllPrimeNumbers(array $primeNumbers): void {
+        $this->database->exec('BEGIN;');
+        foreach ($primeNumbers as $primeNumber) {
+            $sql = 'INSERT OR IGNORE INTO prime_numbers(value, count_from_zero, roman_literal) 
                 VALUES(:value, :count_from_zero, :roman_literal)';
-        $statement = $this->database->prepare($sql);
-        $statement->bindValue(':value', $primeNumber->getValue());
-        $statement->bindValue(':count_from_zero', $primeNumber->getCountFromZero());
-        $statement->bindValue(':roman_literal', $primeNumber->getRomanLiteral());
-        $statement->execute();
+            $statement = $this->database->prepare($sql);
+            $statement->bindValue(':value', $primeNumber->getValue());
+            $statement->bindValue(':count_from_zero', $primeNumber->getCountFromZero());
+            $statement->bindValue(':roman_literal', $primeNumber->getRomanLiteral());
+            $statement->execute();
+        }
+        $this->database->exec('COMMIT;');
     }
 }

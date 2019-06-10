@@ -8,7 +8,9 @@ use App\Model\PrimeNumber;
 use App\Services\DatabaseService;
 use DOMDocument;
 use DOMElement;
+use DOMXPath;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -34,30 +36,33 @@ class ExportToDatabaseCommand extends Command {
 
         $this->validateFile($fileName, $output);
 
-        $output->writeln('<info>Parsing and saving data</info>');
+        $output->writeln('<info>Parsing data ...</info>');
 
-        $primeNumbers = $this->getPrimeNumbersFromXMLFile($fileName);
+        $primeNumbers = $this->getPrimeNumbersFromXMLFile($fileName, $output);
 
         $databaseService = new DatabaseService($databaseName);
 
-        foreach ($primeNumbers as $primeNumber) {
-            $databaseService->insertPrimeNumber($primeNumber);
-        }
+        $output->writeln('<info>Saving data ...</info>');
+
+        $databaseService->insertAllPrimeNumbers($primeNumbers);
 
         $output->writeln('<info>All done!</info>');
     }
 
     /**
      * Documentation for DOMDocument: https://www.php.net/manual/en/class.domdocument.php
+     * Using DOMXpath increases performance significantly.
+     * Found based on: https://stackoverflow.com/questions/9367069/simplexml-vs-domdocument-performance
      * @param $fileName
      * @return array
      */
-    private function getPrimeNumbersFromXMLFile($fileName): array
+    private function getPrimeNumbersFromXMLFile($fileName, $output): array
     {
         $primeNumbers = [];
         $domDocument = new DOMDocument();
         $domDocument->load($fileName);
-        $DOMElements = $domDocument->getElementsByTagName('primeNumber');
+        $xpath = new DOMXpath($domDocument);
+        $DOMElements = $xpath->query("primeNumber");
 
         foreach ($DOMElements as $DOMElement) {
             $primeNumbers[] = $this->createPrimeNumberFromDOMElement($DOMElement);

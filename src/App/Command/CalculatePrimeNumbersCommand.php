@@ -22,10 +22,15 @@ class CalculatePrimeNumbersCommand extends Command {
 
     protected function configure() {
         $this->setName('calculate')
-            ->setDescription('Calculates prime numbers between 0 and the given limit.')
-            ->setHelp('This command allows you to calculate the prime numbers between 0 and the limit that is given.')
-            ->addArgument('range', InputArgument::REQUIRED, 'The range to where the prime numbers should be calculated up to 2097152.')
-            ->addArgument('fileName', InputArgument::REQUIRED, 'The name of the XML file. (no .xml needed)');
+            ->setDescription('Calculates prime numbers between 0 and the given range.')
+            ->setHelp(
+                'This command allows you to calculate the prime numbers between 0 and 
+                the range that is given and save the values with meta data to a XML file.')
+            ->addArgument(
+                'range', InputArgument::REQUIRED,
+                'The range to where the prime numbers should be calculated up to 2097152.')
+            ->addArgument('fileName', InputArgument::REQUIRED,
+                'The name of the XML file. (no .xml needed)');
     }
 
     /**
@@ -149,16 +154,21 @@ class CalculatePrimeNumbersCommand extends Command {
     }
 
     /**
-     * @param $range
+     * @param string $range
      * @param OutputInterface $output
      */
-    private function validateRange($range, OutputInterface $output) {
-        if (!is_int($range)) {
+    private function validateRange(string $range, OutputInterface $output) {
+        if (!is_numeric($range)) {
             $this->outputErrorMessageAndExit($output, 'The range must be an integer');
         }
+        $rangeInteger = intval($range);
+        if ($rangeInteger == 1) {
+            $output->writeln('<info>No prime numbers found!</info>');
+            exit(0);
+        }
         // The max range is currently 209153 because of a memory constraint. This can be updated in the future
-        if ($range > 2097152) {
-            $this->outputErrorMessageAndExit($output, 'The range must be smaller than 209153');
+        if ($rangeInteger < 1 || $rangeInteger > 2097152) {
+            $this->outputErrorMessageAndExit($output, 'The range must be between 1 and 209152');
         }
     }
 

@@ -69,6 +69,7 @@ class PrimeNumber
      * @return string
      */
     private function calculateNumberToRomanLiteral(int $number) {
+        // List of roman literals: https://www.tuomas.salste.net/doc/roman/numeri-romani.html
         $map = [
             "M\u{0305}" => 1000000, "D\u{0305}" => 500000, "C\u{0305}" => 100000,
             "L\u{0305}" => 50000, "X\u{0305}" => 10000, "V\u{0305}" => 5000,
