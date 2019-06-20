@@ -1,4 +1,4 @@
-# PHP assignment
+# Prime number CLI
 
 This CLI application calculates prime numbers between 0 and a given range, prints the roman 
 literals of these prime numbers to the console and saves these in a XML file. After which 
